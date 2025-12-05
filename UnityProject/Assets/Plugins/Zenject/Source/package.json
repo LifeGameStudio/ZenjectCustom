@@ -1,7 +1,7 @@
 {
-  "name": "com.svermeulen.extenject",
+  "name": "com.custom.extenject",
   "version": "10.0.0",
-  "displayName": "Yazef",
+  "displayName": "ZenjectCustom",
   "description": "Dependency Injection Framework for Unity3D",
   "unity": "2019.3",
   "keywords": [

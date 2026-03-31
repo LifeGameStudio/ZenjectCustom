@@ -13,39 +13,26 @@ namespace Zenject
         public static event Action PreResolve;
         public static event Action PostResolve;
 
-        public const string ProjectContextResourcePath = "ProjectContext";
+        public const string ProjectContextResourcePath    = "ProjectContext";
         public const string ProjectContextResourcePathOld = "ProjectCompositionRoot";
 
         static ProjectContext _instance;
 
-        [Tooltip("When true, objects that are created at runtime will be parented to the ProjectContext")]
-        [SerializeField]
+        [Tooltip("When true, objects that are created at runtime will be parented to the ProjectContext")] [SerializeField]
         bool _parentNewObjectsUnderContext = false;
 
-        [Tooltip("When true, zenject will scan and inject into all game objects during startup. Off by default due to its performance penalty")]
-        [SerializeField]
+        [Tooltip("When true, zenject will scan and inject into all game objects during startup. Off by default due to its performance penalty")] [SerializeField]
         bool _autoInjectInHierarchy = false;
 
-        [SerializeField]
-        ZenjectSettings _settings = ZenjectSettings.Default;
+        [SerializeField] ZenjectSettings _settings = ZenjectSettings.Default;
 
         DiContainer _container;
 
-        public override DiContainer Container
-        {
-            get { return _container; }
-        }
+        public override DiContainer Container { get { return _container; } }
 
-        public static bool HasInstance
-        {
-            get { return _instance != null; }
-        }
+        public static bool HasInstance { get { return _instance != null; } }
 
-        public bool AutoInjectInHierarchy
-        {
-            get { return _autoInjectInHierarchy; }
-            set { _autoInjectInHierarchy = value; }
-        }
+        public bool AutoInjectInHierarchy { get { return _autoInjectInHierarchy; } set { _autoInjectInHierarchy = value; } }
 
         public static ProjectContext Instance
         {
@@ -67,12 +54,8 @@ namespace Zenject
             }
         }
 
-        public static bool ValidateOnNextRun
-        {
-            get;
-            set;
-        }
-        
+        public static bool ValidateOnNextRun { get; set; }
+
         public ZenjectSettings Settings
         {
             get => _settings;
@@ -83,10 +66,7 @@ namespace Zenject
             }
         }
 
-        public override IEnumerable<GameObject> GetRootGameObjects()
-        {
-            return new[] { gameObject };
-        }
+        public override IEnumerable<GameObject> GetRootGameObjects() { return new[] { gameObject }; }
 
         public static GameObject TryGetPrefab()
         {
@@ -96,6 +76,7 @@ namespace Zenject
             {
                 Assert.That(prefabs.Length == 1,
                     "Found multiple project context prefabs at resource path '{0}'", ProjectContextResourcePath);
+
                 return (GameObject)prefabs[0];
             }
 
@@ -105,6 +86,7 @@ namespace Zenject
             {
                 Assert.That(prefabs.Length == 1,
                     "Found multiple project context prefabs at resource path '{0}'", ProjectContextResourcePathOld);
+
                 return (GameObject)prefabs[0];
             }
 
@@ -139,7 +121,7 @@ namespace Zenject
 
                     GameObject gameObjectInstance;
 #if UNITY_EDITOR
-                    if(prefabWasActive)
+                    if (prefabWasActive)
                     {
                         // This ensures the prefab's Awake() methods don't fire (and, if in the editor, that the prefab file doesn't get modified)
                         gameObjectInstance = GameObject.Instantiate(prefab, ZenUtilInternal.GetOrCreateInactivePrefabParent());
@@ -195,20 +177,16 @@ namespace Zenject
             {
                 return;
             }
-            
-            PreInstall = null;
+
+            PreInstall  = null;
             PostInstall = null;
-            PreResolve = null;
+            PreResolve  = null;
             PostResolve = null;
-            _instance = null;
+            _instance   = null;
         }
 #endif
 
-        public bool ParentNewObjectsUnderContext
-        {
-            get { return _parentNewObjectsUnderContext; }
-            set { _parentNewObjectsUnderContext = value; }
-        }
+        public bool ParentNewObjectsUnderContext { get { return _parentNewObjectsUnderContext; } set { _parentNewObjectsUnderContext = value; } }
 
         public void EnsureIsInitialized()
         {
@@ -218,8 +196,7 @@ namespace Zenject
         protected override void Awake()
         {
             // We don't call base.Awake here because ProjectContext gets instantiated every time. 
-            
-            
+
             if (Application.isPlaying)
                 // DontDestroyOnLoad can only be called when in play mode and otherwise produces errors
                 // ProjectContext is created during design time (in an empty scene) when running validation
@@ -230,13 +207,19 @@ namespace Zenject
             }
         }
 
+        private void OnDestroy()
+        {
+            Destroy(this.gameObject);
+            _instance = null;
+        }
+
         public void Initialize()
         {
             Assert.IsNull(_container);
-            
+
             // Do this as early as possible before any type analysis occurs
             ReflectionTypeAnalyzer.ConstructorChoiceStrategy = _settings.ConstructorChoiceStrategy;
-            
+
             var isValidating = ValidateOnNextRun;
 
             // Reset immediately to ensure it doesn't get used in another run
@@ -292,10 +275,7 @@ namespace Zenject
             }
         }
 
-        protected override void GetInjectableMonoBehaviours(List<MonoBehaviour> monoBehaviours)
-        {
-            ZenUtilInternal.GetInjectableMonoBehavioursUnderGameObject(gameObject, monoBehaviours);
-        }
+        protected override void GetInjectableMonoBehaviours(List<MonoBehaviour> monoBehaviours) { ZenUtilInternal.GetInjectableMonoBehavioursUnderGameObject(gameObject, monoBehaviours); }
 
         void InstallBindings(List<MonoBehaviour> injectableMonoBehaviours)
         {
@@ -324,7 +304,6 @@ namespace Zenject
             InstallSceneBindings(injectableMonoBehaviours);
 
             InstallInstallers();
-
         }
     }
 }

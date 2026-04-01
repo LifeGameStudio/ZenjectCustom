@@ -6,19 +6,16 @@ namespace Zenject.Internal
     {
         static ListPool<T> _instance = new ListPool<T>();
 
-        public ListPool()
-        {
-            OnDespawnedMethod = OnDespawned;
-        }
+        public ListPool() { OnDespawnedMethod = OnDespawned; }
 
-        public static ListPool<T> Instance
-        {
-            get { return _instance; }
-        }
+        public static ListPool<T> Instance { get { return _instance; } }
 
         void OnDespawned(List<T> list)
         {
-            list.Clear();
+            if (list is { Count: > 0 })
+            {
+                list.Clear();
+            }
         }
     }
 }
